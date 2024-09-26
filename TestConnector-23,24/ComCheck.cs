@@ -409,7 +409,7 @@ namespace TestConnector2
 
                     FamilySymbol symbol = x.Symbol;
 
-                    Parameter wattageParam = symbol.LookupParameter("Apparent Load");
+                    Parameter wattageParam = symbol.LookupParameter("AUTOMETICA_APPARENT LOAD");
 
                     string type_mark = symbol.LookupParameter("Type Mark").AsString();
 
@@ -423,7 +423,7 @@ namespace TestConnector2
                     }
                     else
                     {
-                        Parameter wattageParam1 = x.LookupParameter("Apparent Load");
+                        Parameter wattageParam1 = x.LookupParameter("AUTOMETICA_APPARENT LOAD");
 
                         if (wattageParam1 != null)
                         {
@@ -436,8 +436,9 @@ namespace TestConnector2
 
                         else
                         {
-                            resultMessage += $"Element Id: {type_mark}, Wattage: Not Found\n";
+                            resultMessage += $"Element Id: {type_mark}, Wattage not found. Please make sure wattages are specified for each light placed in the model.\n";
                             TaskDialog.Show("Lighting Fixtures Wattage", resultMessage);
+                            break;
                         }
                     }
                 }

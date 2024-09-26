@@ -13,7 +13,7 @@ namespace TestConnector2
         public static Document Instance { get; set; }
     }
 
-    public static class UIApp
+    public static class uiApplication
     {
         public static UIApplication UiApp { get; set; }
     }

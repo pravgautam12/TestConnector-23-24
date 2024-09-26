@@ -14,16 +14,19 @@ namespace TestConnector2
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
 
-    public class Class4 : IExternalCommand
+    public class EquipmentCircuiting : IExternalCommand
     {
-
+        private static string ribbonPanelName = "Autometica_Electrical";
+        private static string parameter_prefix = "AMCA_";
+        private static string disconnectFamilyName = "Disconnect Switches - Equipment";
+        private static string jBoxFamilyName = "Junction Box";
         public static FamilyInstance electricalPanel;
 
 
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            List<ComboBox> comboBoxes = UIApp.UiApp.GetRibbonPanels("Electrical").SelectMany(panel => panel.GetItems()).OfType<ComboBox>().ToList();
+            List<ComboBox> comboBoxes = uiApplication.UiApp.GetRibbonPanels(ribbonPanelName).SelectMany(panel => panel.GetItems()).OfType<ComboBox>().ToList();
             String jBoxOrDisconnect = null;
             String panelName = null;
 
@@ -57,7 +60,7 @@ namespace TestConnector2
             Element elem = doc.GetElement(pickedref);
             FamilyInstance rtu = elem as FamilyInstance;
 
-            CircuitToPanel(UIApp.UiApp, doc, electricalPanel, rtu, jBoxOrDisconnect);
+            CircuitToPanel(uiApplication.UiApp, doc, electricalPanel, rtu, jBoxOrDisconnect);
 
             IFamilyLoadOptions familyLoadOptions = new FamilyLoadOptions();
 
@@ -198,12 +201,9 @@ namespace TestConnector2
             Double current = 0;
 
             Dictionary<string, Element> disconnectOrJBoxDictionary = new Dictionary<string, Element>();
+            Dictionary<string, Element> disconnectDictionary = new Dictionary<string, Element>();
+            Dictionary<string, Element> jBoxDictionary = new Dictionary<string, Element>();
 
-
-
-            String amps_name = null;
-            String volts_name = null;
-            String phase_name = null;
 
             foreach (ElectricalLoadClassification lc in loadClassifications)
             {
@@ -222,13 +222,13 @@ namespace TestConnector2
             {
 
                 disconnects = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_ElectricalEquipment).WhereElementIsElementType().ToElements();
-                disconnects = disconnects.Where(e => e is ElementType elementType && elementType.FamilyName.Equals("Disconnect Switches - Equipment", StringComparison.OrdinalIgnoreCase)).ToList();
+                disconnects = disconnects.Where(e => e is ElementType elementType && elementType.FamilyName.Equals(disconnectFamilyName, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             if (jBoxorDisconnect == "J-Box")
             {
                 jBoxes = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_ElectricalFixtures).WhereElementIsElementType().ToElements();
-                jBoxes = jBoxes.Where(j => j is ElementType elementType && elementType.FamilyName.Equals("Junction Boxes (Motor)", StringComparison.OrdinalIgnoreCase)).ToList();
+                jBoxes = jBoxes.Where(j => j is ElementType elementType && elementType.FamilyName.Equals(jBoxFamilyName, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             if (jBoxes == null)
@@ -237,7 +237,7 @@ namespace TestConnector2
                 {
                     if (elem.Name != "")
                     {
-                        disconnectOrJBoxDictionary.Add(elem.Name, elem);
+                        disconnectDictionary.Add(elem.Name, elem);
                         //break;
                     }
                 }
@@ -249,20 +249,24 @@ namespace TestConnector2
                 {
                     if (elem.Name != "")
                     {
-                        disconnectOrJBoxDictionary.Add(elem.Name, elem);
+                        jBoxDictionary.Add(elem.Name, elem);
                     }
                 }
 
             }
 
+            String voltageAndPhase = "";
+            String MOCP = "";
+            String KW = "";
+            String FLA = "";
+            String MCA = "";
+
             FamilySymbol symbol = rtu.Symbol;
-            String voltageAndPhase = symbol.LookupParameter("SE_M_ELEC_VOLTS PH TEXT").AsString();
-            String MOCP = symbol.LookupParameter("SE_M_ELEC_MOCP TEXT").AsString();
-            String KW = symbol.LookupParameter("SE_M_FULL LOAD KW TEXT").AsString();
-            String FLA = symbol.LookupParameter("SE_M_ELEC_FLA TEXT").AsString();
-            String MCA = symbol.LookupParameter("SE_M_ELEC_MCA TEXT").AsString();
-
-
+            try { voltageAndPhase = symbol.LookupParameter(parameter_prefix + "M_ELEC_VOLTS PH TEXT").AsString(); } catch { }
+            try { MOCP = symbol.LookupParameter(parameter_prefix + "M_ELEC_MOCP TEXT").AsString(); } catch { }
+            try { KW = symbol.LookupParameter(parameter_prefix + "M_FULL LOAD KW TEXT").AsString(); } catch { }
+            try { FLA = symbol.LookupParameter(parameter_prefix + "M_ELEC_FLA TEXT").AsString(); } catch { }
+            try { MCA = symbol.LookupParameter(parameter_prefix + "M_ELEC_MCA TEXT").AsString(); } catch { }
 
             CircuitInformation cktInfo = new CircuitInformation();
             cktInfo.SetVoltageAndFactor(voltageAndPhase);
@@ -279,9 +283,21 @@ namespace TestConnector2
                 VA = cktInfo.voltage * cktInfo.factor * cktInfo.current;
             }
 
-            Element desired_Disconnect = disconnectOrJBoxDictionary[cktInfo.amps_name + " -" + " " + cktInfo.volts_name + " -" + " " + cktInfo.phase_name + "PH"] as Element;
+            Element desired_Disconnect = null;
+            Element desired_jBox = null;
+            FamilyInstance disconnectOrJBoxPlaced = null;
 
-            FamilyInstance disconnectOrJBoxPlaced = PlaceDisconnectOrJBox(doc, rtu, desired_Disconnect, jBoxorDisconnect);
+            if (disconnects != null)
+            {
+                desired_Disconnect = disconnectDictionary[cktInfo.amps_name + " -" + " " + cktInfo.volts_name + " -" + " " + cktInfo.phase_name + "PH"] as Element;
+                disconnectOrJBoxPlaced = PlaceDisconnectOrJBox(doc, rtu, desired_Disconnect, jBoxorDisconnect);
+            }
+
+            if (disconnects == null)
+            {
+                desired_jBox = jBoxDictionary[cktInfo.volts_name + " -" + " " + cktInfo.phase_name + "PH"] as Element;
+                disconnectOrJBoxPlaced = PlaceDisconnectOrJBox(doc, rtu, desired_jBox, jBoxorDisconnect);
+            }
 
             Transaction circuit = new Transaction(doc, "Creating Electrical System");
             circuit.Start();
@@ -298,47 +314,80 @@ namespace TestConnector2
 
             Connector electricalConnector = GetConnector(disconnectOrJBoxPlaced);
 
-            ElectricalSystem elecSys = ElectricalSystem.Create(electricalConnector, ElectricalSystemType.PowerCircuit);
-            elecSys.Rating = cktInfo.BreakerRating;
-            elecSys.LoadName = rtu.LookupParameter("Mark").AsString() + cktInfo.GetWireSize(elecSys.Rating);
+            ElectricalSystem elecSys = null;
 
-            try
+            if (electricalConnector != null)
             {
-                elecSys.SelectPanel(electricalPanel);
-            }
-            catch
-            {
-                //Parameter param = electricalPanel.LookupParameter("Distribution System");
-                String distributionSystem = electricalPanel.LookupParameter("Distribution System").AsValueString().Replace(" Wye", "");
-                //distributionSystem.Replace(" Wye", "");
-                string[] splitArray = distributionSystem.Split('/');
-                List<string> distributionVoltages = new List<string>(splitArray);
-                if (cktInfo.voltage != Double.Parse(distributionVoltages[0]) && cktInfo.voltage != Double.Parse(distributionVoltages[1]))
+                elecSys = ElectricalSystem.Create(electricalConnector, ElectricalSystemType.PowerCircuit);
+                elecSys.Rating = cktInfo.BreakerRating;
+                elecSys.LoadName = rtu.LookupParameter("Mark").AsString() + cktInfo.GetWireSize(elecSys.Rating);
+                try
                 {
-                    TaskDialog.Show("Cannot connect to panel", "Please make sure the panel voltage and equipment voltage match.");
+                    elecSys.SelectPanel(electricalPanel);
                 }
-                else
+                catch
                 {
-                    try
+                    //Parameter param = electricalPanel.LookupParameter("Distribution System");
+                    String distributionSystem = electricalPanel.LookupParameter("Distribution System").AsValueString().Replace(" Wye", "");
+                    //distributionSystem.Replace(" Wye", "");
+                    string[] splitArray = distributionSystem.Split('/');
+                    List<string> distributionVoltages = new List<string>(splitArray);
+                    if (cktInfo.voltage != Double.Parse(distributionVoltages[0]) && cktInfo.voltage != Double.Parse(distributionVoltages[1]))
+                    {
+                        TaskDialog.Show("Cannot connect to panel", "Please make sure the panel voltage and equipment voltage match.");
+                    }
+                    else
                     {
                         ReplacingSparesOrSpaces replacingSparesOrSpaces = new ReplacingSparesOrSpaces(cktInfo.factor, cktInfo.voltage, electricalPanel, doc);
                         replacingSparesOrSpaces.CircuitWhenSparesOrSpaces(elecSys);
                     }
 
-                    catch
+                }
+            }
+
+            else
+            {
+                TaskDialog.Show("Error", "Unable to find the electrical connector of element");
+            }
+
+            bool isElementOutside = OutsideOrNot(doc, disconnectOrJBoxPlaced);
+
+            if (isElementOutside == true)
+            {
+                if (jBoxorDisconnect == "Disconnect")
+                {
+                    //disconnectOrJBoxPlaced.LookupParameter("Comments").Set($"{amps_name}");
+                    Parameter comments = disconnectOrJBoxPlaced.LookupParameter("Comments");
+
+                    if (cktInfo.phase_name == "1")
                     {
-                        TaskDialog.Show("Could not connect", "Could not connect to panel, please check spares/spaces");
+                        comments.Set($"{cktInfo.amps_name.Replace("A", "")}/2/NF/N3R");
+                    }
+                    else if (cktInfo.phase_name == "3")
+                    {
+                        comments.Set($"{cktInfo.amps_name.Replace("A", "")}/3/NF/N3R");
                     }
                 }
+            }
 
+            else
+            {
+                if (jBoxorDisconnect == "Disconnect")
+                {
+                    Parameter comments = disconnectOrJBoxPlaced.LookupParameter("Comments");
+                    if (cktInfo.phase_name == "1")
+                    {
+                        comments.Set($"{cktInfo.amps_name.Replace("A", "")}/2/NF");
+                    }
+                    else if (cktInfo.phase_name == "3")
+                    {
+                        comments.Set($"{cktInfo.amps_name.Replace("A", "")}/3/NF");
+                    }
+                }
             }
 
 
-
-
-
             circuit.Commit();
-
         }
 
         public static PanelScheduleView GetPanelSchedule(FamilyInstance panel, Document doc)
@@ -381,6 +430,19 @@ namespace TestConnector2
 
             }
             return null;
+        }
+
+        public static bool OutsideOrNot(Document doc, FamilyInstance familyInstance)
+        {
+            WorksetTable worksetTable = doc.GetWorksetTable();
+            WorksetId worksetId = familyInstance.WorksetId;
+            Workset workset = worksetTable.GetWorkset(worksetId);
+
+            if (workset.Name == "ELEC - ROOF" || workset.Name == "ELEC - SITE")
+            {
+                return true;
+            }
+            return false;
         }
 
     }

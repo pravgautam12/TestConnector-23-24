@@ -6,6 +6,8 @@ using Autodesk.Revit.UI;
 using System;
 using System.Reflection;
 using System.Collections.Generic;
+using System.IO;
+using System.Windows.Media.Imaging;
 
 
 namespace TestConnector2
@@ -36,30 +38,43 @@ namespace TestConnector2
 
         public Result OnStartup(UIControlledApplication application)
         {
-            String nameSpaceName = "TestConnector2";
-            String tabName = "ElectricalTestyTesty";
+
+            //ListEmbeddedResources();
+
+            String nameSpaceName = variables.nameSpaceName;
+            String tabName = "Autometica_Electrical";
             application.CreateRibbonTab(tabName);
 
             application.Idling += (sender, args) =>
             {
                 UIApplication uu = sender as UIApplication;
-                UIApp.UiApp = uu;
+                uiApplication.UiApp = uu;
             };
 
             RibbonPanel ribbonPanel = application.CreateRibbonPanel(tabName, "Tools");
             RibbonPanel ribbonPanel1 = application.CreateRibbonPanel(tabName, "ComCheck");
             RibbonPanel ribbonPanel2 = application.CreateRibbonPanel(tabName, "HVAC Circuiting");
 
-
             string assemblyPath = Assembly.GetExecutingAssembly().Location;
 
             PushButtonData buttonData = new PushButtonData("Run ComCheck", "Run ComCheck", assemblyPath, nameSpaceName + ".ComCheck");
+            buttonData.Image = LoadImage(nameSpaceName+".Resources.run.png");
+
             PushButtonData buttonData0 = new PushButtonData("Optional: Input Square Footage", "Optional: Input Square Footage", assemblyPath, nameSpaceName + ".Option0Command");
-            PushButtonData b1Data = new PushButtonData("Create Connector", "Create Connector", assemblyPath, nameSpaceName + ".Class1");
-            PushButtonData b2Data = new PushButtonData("Create panel schedules", "Create panel schedules", assemblyPath, nameSpaceName + ".Class3");
+            buttonData0.Image = LoadImage(nameSpaceName+".Resources.squareFootage.png");
+
+            PushButtonData b1Data = new PushButtonData("Create Connector", "Create Connector", assemblyPath, nameSpaceName + ".CreateConnector");
+            b1Data.Image = LoadImage(nameSpaceName+".Resources.connector.PNG");
+
+            PushButtonData b2Data = new PushButtonData("Create panel schedules", "Create panel schedules", assemblyPath, nameSpaceName + ".PanelScheduleCreation");
+            b2Data.Image = LoadImage(nameSpaceName+".Resources.createPanelSchedule.png");
+            
             PulldownButtonData pulldownData = new PulldownButtonData("DropdownButton", "Select Building Type");
+            pulldownData.Image = LoadImage(nameSpaceName+".Resources.buildingType.png");
 
             TextBoxData data = new TextBoxData("changeTemplate");
+            //PushButtonData textBoxReplacement = new PushButtonData("Change panel template", "Change panel template", assemblyPath, "TestConnector.TemplateChange");
+            //textBoxReplacement.Image = LoadImage("TestConnector_23_24.Resources.changePanelTemplate.png");
 
             IList<RibbonItem> stackedItems = ribbonPanel.AddStackedItems(b1Data, b2Data, data);
             IList<RibbonItem> stackedItems1 = ribbonPanel1.AddStackedItems(pulldownData, buttonData0, buttonData);
@@ -70,7 +85,7 @@ namespace TestConnector2
 
             textbox.PromptText = "Enter Panel Template";
 
-            //application.ControlledApplication.DocumentOpened += OnDocumentOpened;
+            ////application.ControlledApplication.DocumentOpened += OnDocumentOpened;
             textbox.EnterPressed += TextBox_EnterPressed;
 
             PushButtonData buttonData1 = new PushButtonData("Automotive Facility", "Automotive Facility", assemblyPath, nameSpaceName + ".Option1Command");
@@ -154,10 +169,12 @@ namespace TestConnector2
 
             application.ControlledApplication.DocumentOpened += OnDocumentOpened;
 
-            PushButtonData b3Data = new PushButtonData("Add", "Add", Assembly.GetExecutingAssembly().Location, nameSpaceName + ".Class4");
+            PushButtonData b3Data = new PushButtonData("Add", "Add", Assembly.GetExecutingAssembly().Location, nameSpaceName + ".EquipmentCircuiting");
+            b3Data.Image = LoadImage("TestConnector_23_24.Resources.add.png");
             ribbonPanel2.AddStackedItems(cDataSecond, b3Data);
 
-            PushButtonData b4Data = new PushButtonData("Remove", "Remove", Assembly.GetExecutingAssembly().Location, nameSpaceName + ".Class4");
+            PushButtonData b4Data = new PushButtonData("Remove", "Remove", Assembly.GetExecutingAssembly().Location, nameSpaceName + ".EquipmentCircuiting");
+            b4Data.Image = LoadImage("TestConnector_23_24.Resources.remove.png");
 
             IList<RibbonItem> items = ribbonPanel2.GetItems();
             cBoxSecond = items[0] as ComboBox;
@@ -189,7 +206,7 @@ namespace TestConnector2
         {
             DocumentInstance.Instance = e.Document;
             UIApplication uiapp = sender as UIApplication;
-            UIApp.UiApp = uiapp;
+            uiApplication.UiApp = uiapp;
             Document doc = e.Document;
 
             //new code
@@ -215,6 +232,35 @@ namespace TestConnector2
             }
 
             //new code finished
+        }
+
+        private BitmapImage LoadImage(string embeddedPath)
+        {
+            try
+            {
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                Stream stream = assembly.GetManifestResourceStream(embeddedPath);
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.StreamSource = stream;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
+            }
+
+            catch
+            {
+                return null;
+            }
+        }
+
+        private void ListEmbeddedResources()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            string[] resources = assembly.GetManifestResourceNames();
+            string resourceList = string.Join("\n", resources);
+            TaskDialog.Show("Resources", "Available resources:\n" + resourceList);
         }
 
         public Result OnShutdown(UIControlledApplication application)

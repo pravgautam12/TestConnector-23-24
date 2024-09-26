@@ -12,8 +12,22 @@ namespace TestConnector2
 {
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
-    public class Class3 : IExternalCommand
+    public class PanelScheduleCreation : IExternalCommand
     {
+
+        private bool IsAPanelBoard(Element elem)
+        {
+            FamilyInstance panelInstance = elem as FamilyInstance;
+
+            if (panelInstance == null) return false;
+
+            var distParam = panelInstance.LookupParameter("Distribution System") ?? panelInstance.Symbol.LookupParameter("Distribution System");
+            var secDistParam = panelInstance.LookupParameter("Secondary Distribution System") ?? panelInstance.Symbol.LookupParameter("Secondary Distribution System");
+            var mainsParam = panelInstance.LookupParameter("Mains Type") ?? panelInstance.Symbol.LookupParameter("Mains Type");
+
+            return distParam != null && secDistParam == null && mainsParam != null;
+        }
+
         public Result Execute(
             ExternalCommandData commandData,
         ref string message,
@@ -32,9 +46,7 @@ namespace TestConnector2
 
                 IList<Element> panels = new FilteredElementCollector(doc)
                     .OfCategory(BuiltInCategory.OST_ElectricalEquipment)
-                    .WhereElementIsNotElementType().Where(e => e.LookupParameter("Distribution System") != null &&
-                    e.LookupParameter("Secondary Distribution System") == null &&
-                    e.LookupParameter("Mains Type") != null).ToList();
+                    .WhereElementIsNotElementType().Where(e => IsAPanelBoard(e)).ToList();
 
 
                 // Count the panels

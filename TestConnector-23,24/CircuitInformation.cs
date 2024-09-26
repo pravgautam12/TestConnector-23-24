@@ -89,6 +89,7 @@ namespace TestConnector2
         {
             String v = null;
             int volts = 0;
+            int phase = 0;
             try
             {
                 v = voltageAndPhase.Split('/')[0];
@@ -107,6 +108,8 @@ namespace TestConnector2
             {
                 TaskDialog.Show("Parsing error", "Could not parse voltageAndPhase parameter");
             }
+            try { phase = int.Parse(phase_name); } catch { }
+            phase_name = phase.ToString();
 
             var voltsMap = new Dictionary<double, double>
             {
@@ -168,13 +171,13 @@ namespace TestConnector2
 
                         if (voltage == 208 || voltage == 240 || voltage == 480)
                         {
-                            return "\n2" + WireSizeMap[key];
+                            return " \n2" + WireSizeMap[key];
                         }
                     }
 
                     if (phase_name == "3")
                     {
-                        return "\n3" + WireSizeMap[key];
+                        return " \n3" + WireSizeMap[key];
 
                     }
                     break;
