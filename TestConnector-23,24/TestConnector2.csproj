@@ -32,6 +32,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
@@ -55,27 +58,77 @@
     <Compile Include="Application.cs" />
     <Compile Include="ApplicationInstance.cs" />
     <Compile Include="CircuitInformation.cs" />
-    <Compile Include="Electrical Connectors and Parameters\CreateConnector.cs" />
+    <Compile Include="CreateConnector.cs" />
     <Compile Include="Class2.cs" />
-    <Compile Include="Electrical Connectors and Parameters\Views\CreateConnectorUC.xaml.cs">
+    <Compile Include="Electrical Connectors and Parameters\Views\ChangeTemplateXAML\ChangeTemplateUC.xaml.cs">
+      <DependentUpon>ChangeTemplateUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Electrical Connectors and Parameters\Views\ChangeTemplateXAML\ChangeTemplateViewModel.cs" />
+    <Compile Include="Electrical Connectors and Parameters\Views\ChangeTemplateXAML\ChangeTemplateW.xaml.cs">
+      <DependentUpon>ChangeTemplateW.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Electrical Connectors and Parameters\Views\ChangeTemplateXAML\Panel.cs" />
+    <Compile Include="Electrical Connectors and Parameters\Views\COMcheckXAML\COMcheckUC.xaml.cs">
+      <DependentUpon>COMcheckUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Electrical Connectors and Parameters\Views\COMcheckXAML\COMcheckW.xaml.cs">
+      <DependentUpon>COMcheckW.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Electrical Connectors and Parameters\Views\CreateConnectorXAML\CreateConnectorUC.xaml.cs">
       <DependentUpon>CreateConnectorUC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Electrical Connectors and Parameters\Views\CreateConnectorW.xaml.cs">
+    <Compile Include="Electrical Connectors and Parameters\Views\CreateConnectorXAML\CreateConnectorW.xaml.cs">
       <DependentUpon>CreateConnectorW.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Electrical Connectors and Parameters\Views\MoveCircuitsXAML\CircuitItem.cs" />
+    <Compile Include="Electrical Connectors and Parameters\Views\MoveCircuitsXAML\MoveCircuitsUC.xaml.cs">
+      <DependentUpon>MoveCircuitsUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Electrical Connectors and Parameters\Views\MoveCircuitsXAML\MoveCircuitsViewModel.cs" />
+    <Compile Include="Electrical Connectors and Parameters\Views\MoveCircuitsXAML\MoveCircuitsW.xaml.cs">
+      <DependentUpon>MoveCircuitsW.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FixBreakerAndWireSizes.cs" />
+    <Compile Include="MoveCircuits.cs" />
     <Compile Include="PanelScheduleCreation.cs" />
     <Compile Include="EquipmentCircuiting.cs" />
     <Compile Include="ComCheck.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReplacingSparesOrSpaces.cs" />
+    <Compile Include="RunCOMcheck.cs" />
+    <Compile Include="TemplateChange.cs" />
     <Compile Include="variables.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Electrical Connectors and Parameters\Views\CreateConnectorUC.xaml">
+    <Page Include="Electrical Connectors and Parameters\Views\ChangeTemplateXAML\ChangeTemplateUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Electrical Connectors and Parameters\Views\CreateConnectorW.xaml">
+    <Page Include="Electrical Connectors and Parameters\Views\ChangeTemplateXAML\ChangeTemplateW.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Electrical Connectors and Parameters\Views\COMcheckXAML\COMcheckUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Electrical Connectors and Parameters\Views\COMcheckXAML\COMcheckW.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Electrical Connectors and Parameters\Views\CreateConnectorXAML\CreateConnectorUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Electrical Connectors and Parameters\Views\CreateConnectorXAML\CreateConnectorW.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Electrical Connectors and Parameters\Views\MoveCircuitsXAML\MoveCircuitsUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Electrical Connectors and Parameters\Views\MoveCircuitsXAML\MoveCircuitsW.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -87,15 +140,6 @@
     <EmbeddedResource Include="Resources\buildingType.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\changePanelTemplate.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\connector.PNG">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\createPanelSchedule.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="Resources\remove.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -103,6 +147,44 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\squareFootage.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\moveCircuits.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\moveCircuits2nd.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\runCOMcheck.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\createConnector.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\createPanelSchedule.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\changePanelTemplate.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\breakerCheck.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

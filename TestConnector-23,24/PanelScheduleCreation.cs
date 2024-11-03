@@ -15,7 +15,7 @@ namespace TestConnector2
     public class PanelScheduleCreation : IExternalCommand
     {
 
-        private bool IsAPanelBoard(Element elem)
+        internal bool IsAPanelBoard(Element elem)
         {
             FamilyInstance panelInstance = elem as FamilyInstance;
 

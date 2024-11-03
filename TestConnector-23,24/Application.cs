@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Media.Imaging;
+using System.Resources;
 
 
 namespace TestConnector2
@@ -51,9 +52,10 @@ namespace TestConnector2
                 uiApplication.UiApp = uu;
             };
 
-            RibbonPanel ribbonPanel = application.CreateRibbonPanel(tabName, "Tools");
+            RibbonPanel ribbonPanel = application.CreateRibbonPanel(tabName, "Connectors, schedules and Circuits");
             RibbonPanel ribbonPanel1 = application.CreateRibbonPanel(tabName, "ComCheck");
             RibbonPanel ribbonPanel2 = application.CreateRibbonPanel(tabName, "HVAC Circuiting");
+            RibbonPanel ribbonPanel3 = application.CreateRibbonPanel(tabName, "COMcheck");
 
             string assemblyPath = Assembly.GetExecutingAssembly().Location;
 
@@ -63,30 +65,30 @@ namespace TestConnector2
             PushButtonData buttonData0 = new PushButtonData("Optional: Input Square Footage", "Optional: Input Square Footage", assemblyPath, nameSpaceName + ".Option0Command");
             buttonData0.Image = LoadImage(nameSpaceName+".Resources.squareFootage.png");
 
-            PushButtonData b1Data = new PushButtonData("Create Connector", "Create Connector", assemblyPath, nameSpaceName + ".CreateConnector");
-            b1Data.Image = LoadImage(nameSpaceName+".Resources.connector.PNG");
+            PushButtonData createConnectorButtonData = new PushButtonData("Create Connector", "Create Connector", assemblyPath, nameSpaceName + ".CreateConnector");
+            createConnectorButtonData.Image = LoadImage(nameSpaceName+".Resources.createConnector.png");
 
-            PushButtonData b2Data = new PushButtonData("Create panel schedules", "Create panel schedules", assemblyPath, nameSpaceName + ".PanelScheduleCreation");
-            b2Data.Image = LoadImage(nameSpaceName+".Resources.createPanelSchedule.png");
+            PushButtonData createPanelSchedulesButtonData = new PushButtonData("Create panel schedules", "Create panel schedules", assemblyPath, nameSpaceName + ".PanelScheduleCreation");
+            createPanelSchedulesButtonData.Image = LoadImage(nameSpaceName+".Resources.createPanelSchedule.png");
+
+            PushButtonData moveCircuitsButtonData = new PushButtonData("Move circuits", "Move circuits", assemblyPath, nameSpaceName + ".MoveCircuits");
+            moveCircuitsButtonData.LargeImage = LoadImage(nameSpaceName + ".Resources.moveCircuits2nd.png");
+
+            PushButtonData breakerCheck = new PushButtonData("Flag insufficient breakers", "Flag insufficient breakers", assemblyPath, nameSpaceName + ".FixBreakerAndWireSizes");
+            breakerCheck.LargeImage = LoadImage(nameSpaceName + ".Resources.breakerCheck.png");
             
             PulldownButtonData pulldownData = new PulldownButtonData("DropdownButton", "Select Building Type");
             pulldownData.Image = LoadImage(nameSpaceName+".Resources.buildingType.png");
 
-            TextBoxData data = new TextBoxData("changeTemplate");
-            //PushButtonData textBoxReplacement = new PushButtonData("Change panel template", "Change panel template", assemblyPath, "TestConnector.TemplateChange");
-            //textBoxReplacement.Image = LoadImage("TestConnector_23_24.Resources.changePanelTemplate.png");
+            PushButtonData changePanelTemplateButtonData = new PushButtonData("Change panel template", "Change panel template", assemblyPath, nameSpaceName + ".TemplateChange");
+            changePanelTemplateButtonData.Image = LoadImage(nameSpaceName + ".Resources.changePanelTemplate.png");
 
-            IList<RibbonItem> stackedItems = ribbonPanel.AddStackedItems(b1Data, b2Data, data);
+            IList<RibbonItem> stackedItems = ribbonPanel.AddStackedItems(createConnectorButtonData, createPanelSchedulesButtonData, changePanelTemplateButtonData);
+            ribbonPanel.AddItem(moveCircuitsButtonData);
+            ribbonPanel.AddItem(breakerCheck);
             IList<RibbonItem> stackedItems1 = ribbonPanel1.AddStackedItems(pulldownData, buttonData0, buttonData);
 
             PulldownButton pulldownButton = stackedItems1[0] as PulldownButton;
-
-            TextBox textbox = stackedItems[2] as TextBox;
-
-            textbox.PromptText = "Enter Panel Template";
-
-            ////application.ControlledApplication.DocumentOpened += OnDocumentOpened;
-            textbox.EnterPressed += TextBox_EnterPressed;
 
             PushButtonData buttonData1 = new PushButtonData("Automotive Facility", "Automotive Facility", assemblyPath, nameSpaceName + ".Option1Command");
             pulldownButton.AddPushButton(buttonData1);
@@ -169,19 +171,19 @@ namespace TestConnector2
 
             application.ControlledApplication.DocumentOpened += OnDocumentOpened;
 
-            PushButtonData b3Data = new PushButtonData("Add", "Add", Assembly.GetExecutingAssembly().Location, nameSpaceName + ".EquipmentCircuiting");
-            b3Data.Image = LoadImage("TestConnector_23_24.Resources.add.png");
-            ribbonPanel2.AddStackedItems(cDataSecond, b3Data);
+            PushButtonData b4Data = new PushButtonData("Add", "Add", Assembly.GetExecutingAssembly().Location, nameSpaceName + ".EquipmentCircuiting");
+            b4Data.Image = LoadImage(nameSpaceName + ".Resources.add.png");
+            ribbonPanel2.AddStackedItems(cDataSecond, b4Data);
 
-            PushButtonData b4Data = new PushButtonData("Remove", "Remove", Assembly.GetExecutingAssembly().Location, nameSpaceName + ".EquipmentCircuiting");
-            b4Data.Image = LoadImage("TestConnector_23_24.Resources.remove.png");
+            PushButtonData b5Data = new PushButtonData("Remove", "Remove", Assembly.GetExecutingAssembly().Location, nameSpaceName + ".EquipmentCircuiting");
+            b5Data.Image = LoadImage(nameSpaceName + ".Resources.remove.png");
 
             IList<RibbonItem> items = ribbonPanel2.GetItems();
             cBoxSecond = items[0] as ComboBox;
 
             ComboBoxData cData = new ComboBoxData("Select Type");
             //ComboBox cBox = ribbonPanel.AddItem(cData) as ComboBox;
-            ribbonPanel2.AddStackedItems(cData, b4Data);
+            ribbonPanel2.AddStackedItems(cData, b5Data);
             IList<RibbonItem> items1 = ribbonPanel2.GetItems();
             ComboBox cBox = items1[2] as ComboBox;
             ComboBoxMemberData jBoxData = new ComboBoxMemberData("J-Box", "J-Box");
@@ -190,9 +192,10 @@ namespace TestConnector2
             IList<ComboBoxMemberData> memberData = new List<ComboBoxMemberData> { jBoxData, disconnectData };
             cBox.AddItems(memberData);
 
-            //new code finished 
-
-
+            PushButtonData comcheckButtonData = new PushButtonData("Run COMcheck", "Run COMcheck", Assembly.GetExecutingAssembly().Location, nameSpaceName + ".RunCOMcheck");
+            comcheckButtonData.LargeImage = LoadImage(nameSpaceName + ".Resources.runCOMcheck.png");
+            ribbonPanel3.AddItem(comcheckButtonData);
+            
             return Result.Succeeded;
         }
         private void TextBox_EnterPressed(object sender, EventArgs e)

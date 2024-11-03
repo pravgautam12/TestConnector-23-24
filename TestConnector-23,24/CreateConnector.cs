@@ -96,12 +96,12 @@ namespace TestConnector2
 
         {
             //getting the current Revit process
-            IntPtr revitMainWindowHandle = Process.GetProcessesByName("Revit").FirstOrDefault()?.MainWindowHandle ?? IntPtr.Zero;
+            IntPtr revitMainWindowHandle = SetWindowHandle.revitMainWindowHandle;
             if (revitMainWindowHandle == IntPtr.Zero)
             {
                 TaskDialog.Show("Error", "Revit window not found");
             }
-            
+
             CreateConnectorW connectorWindow = new CreateConnectorW(commandData);
             connectorWindow.Show();
 

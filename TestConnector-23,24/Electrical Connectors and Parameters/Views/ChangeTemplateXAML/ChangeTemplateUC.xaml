@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="TestConnector2.Electrical_Connectors_and_Parameters.Views.ChangeTemplateXAML.ChangeTemplateUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TestConnector2.Electrical_Connectors_and_Parameters.Views.ChangeTemplateXAML"
+             mc:Ignorable="d" 
+             Height="Auto" Width="Auto">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="10,10,10,0" FontSize="13">Select electrical equipment</TextBlock>
+        
+        <ListBox x:Name="PanelsList" Grid.Row="1" Grid.Column="0" MaxHeight="600" HorizontalAlignment="Left" SelectionMode="Multiple" Margin="10,10,10,10" ItemsSource="{Binding PanelsList}" Width="200" Visibility="{Binding PanelItemsVisibility}" d:ItemsSource="{d:SampleData ItemCount=5}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox HorizontalAlignment="Left" Content="{Binding PanelName}" IsChecked="{Binding IsChecked, Mode=Twoway}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ComboBox Name="SelectPanelTemplate" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="13" HorizontalAlignment="Left" Margin="10,10,10,0" Text="Select template"  Grid.Row="0" Grid.Column="1" Height="28" Width="140" IsReadOnly="True" IsEditable="True" SelectionChanged="SelectPanelTemplate_SelectionChanged"></ComboBox>
+
+        <Button Name="ChangeTemplateButton" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="13" HorizontalAlignment="Left" Margin="10,10,10,0" Grid.Row="1" Grid.Column="1" Height="28" Width="140" VerticalAlignment="Top" Click="ChangeTemplates">Change template(s)</Button>
+    </Grid>
+</UserControl>
